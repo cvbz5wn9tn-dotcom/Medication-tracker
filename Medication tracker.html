@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>متابعة الأدوية اليومية</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  /* ── Reset & Base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+–bg: #060d1a;
+–surf: #0d1f3c;
+–card: #0f2444;
+–border: #1a3a6e;
+–text: #e2eaf8;
+–sub: #7a96c2;
+–accent: #4db8ff;
+–accent2: #1a6fbd;
+–pill: #0a2040;
+–pill-bdr: #1a5096;
+–danger: #ff5e57;
+–green: #22c55e;
+–inp: #07172e;
+–inp-bdr: #1e3f6f;
+–grad: linear-gradient(135deg, #0a2a6e, #081a4a);
+–shadow: 0 4px 24px #00000070;
+–shadow-sm: 0 2px 12px #00000050;
+}
+.light {
+–bg: #f0f5fc;
+–surf: #ffffff;
+–card: #ffffff;
+–border: #d0dff0;
+–text: #1a2a42;
+–sub: #5a728e;
+–accent: #1565c0;
+–accent2: #0d47a1;
+–pill: #e8f0fe;
+–pill-bdr: #90b0ef;
+–danger: #e53935;
+–green: #16a34a;
+–inp: #f5f8ff;
+–inp-bdr: #c0d0e8;
+–grad: linear-gradient(135deg, #1565c0, #1e88e5);
+–shadow: 0 4px 20px #00000018;
+–shadow-sm: 0 2px 10px #00000012;
+}
+
+body {
+font-family: ‘Tajawal’, sans-serif;
+background: var(–bg);
+color: var(–text);
+min-height: 100vh;
+transition: background .3s, color .3s;
+direction: rtl;
+}
+
+/* ── Header ── */
+.header {
+background: var(–grad);
+padding: 18px 24px 16px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+box-shadow: 0 4px 28px #00000055;
+position: sticky;
+top: 0;
+z-index: 100;
+}
+.header-title { font-size: 20px; font-weight: 900; color: #fff; letter-spacing: -0.3px; }
+.header-sub { font-size: 12px; color: #90caf9; margin-top: 3px; }
+.dark-btn {
+background: #ffffff20;
+border: 1px solid #ffffff30;
+border-radius: 10px;
+width: 40px; height: 40px;
+cursor: pointer;
+font-size: 18px;
+display: flex; align-items: center; justify-content: center;
+transition: all .2s;
+flex-shrink: 0;
+}
+.dark-btn:hover { background: #ffffff35; }
+
+/* ── Container ── */
+.container { max-width: 660px; margin: 0 auto; padding: 18px 14px 90px; }
+
+/* ── Tabs ── */
+.tabs {
+display: flex;
+gap: 6px;
+background: var(–surf);
+border: 1px solid var(–border);
+border-radius: 13px;
+padding: 5px;
+margin-bottom: 18px;
+box-shadow: var(–shadow);
+}
+.tab-btn {
+flex: 1;
+padding: 10px 0;
+border: none;
+border-radius: 10px;
+cursor: pointer;
+font-family: ‘Tajawal’, sans-serif;
+font-weight: 700;
+font-size: 14px;
+background: transparent;
+color: var(–sub);
+transition: all .25s;
+}
+.tab-btn.active { background: var(–accent); color: #fff; }
+
+/* ── Cards ── */
+.card {
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 14px;
+padding: 18px;
+margin-bottom: 14px;
+box-shadow: var(–shadow);
+animation: fadeIn .3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.sec-title {
+font-size: 14px;
+font-weight: 700;
+color: var(–accent);
+margin-bottom: 14px;
+display: flex;
+align-items: center;
+gap: 7px;
+}
+
+/* ── Form Elements ── */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+@media (max-width: 480px) { .grid2 { grid-template-columns: 1fr; } }
+
+label { font-size: 12px; font-weight: 600; color: var(–sub); display: block; margin-bottom: 5px; }
+
+input, textarea, select {
+width: 100%;
+padding: 9px 12px;
+border-radius: 9px;
+border: 1.5px solid var(–inp-bdr);
+background: var(–inp);
+color: var(–text);
+font-family: ‘Tajawal’, sans-serif;
+font-size: 13px;
+outline: none;
+transition: border-color .2s, box-shadow .2s;
+direction: rtl;
+}
+input:focus, textarea:focus { border-color: var(–accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(–accent) 15%, transparent); }
+textarea { resize: vertical; min-height: 70px; line-height: 1.6; }
+input[type=“time”] { direction: ltr; text-align: center; }
+
+/* ── Buttons ── */
+.btn {
+padding: 10px 22px;
+border: none;
+border-radius: 10px;
+cursor: pointer;
+font-family: ‘Tajawal’, sans-serif;
+font-weight: 700;
+font-size: 13px;
+transition: all .2s;
+}
+.btn:active { transform: scale(.97); }
+.btn-primary { background: var(–accent); color: #fff; }
+.btn-primary:hover { filter: brightness(1.1); }
+.btn-success { background: var(–green); color: #fff; }
+.btn-success:hover { filter: brightness(1.1); }
+
+/* ── Med Pills ── */
+.med-pill {
+display: flex;
+align-items: center;
+justify-content: space-between;
+background: var(–pill);
+border: 1px solid var(–pill-bdr);
+border-radius: 10px;
+padding: 10px 12px;
+margin-bottom: 8px;
+animation: fadeIn .2s ease;
+}
+.med-name { font-weight: 700; font-size: 13px; }
+.med-name span { color: var(–sub); font-weight: 400; }
+.med-meta { font-size: 11px; color: var(–sub); margin-top: 2px; }
+.del-btn {
+background: none;
+border: none;
+cursor: pointer;
+color: var(–danger);
+font-size: 16px;
+padding: 3px 7px;
+border-radius: 6px;
+transition: background .2s;
+flex-shrink: 0;
+}
+.del-btn:hover { background: color-mix(in srgb, var(–danger) 15%, transparent); }
+
+/* ── Day Cards (History) ── */
+.day-card {
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 13px;
+margin-bottom: 10px;
+overflow: hidden;
+box-shadow: var(–shadow-sm);
+transition: border-color .2s;
+}
+.day-card:hover { border-color: var(–accent); }
+.day-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 13px 16px;
+cursor: pointer;
+user-select: none;
+transition: background .2s;
+}
+.day-header:hover { background: color-mix(in srgb, var(–accent) 8%, transparent); }
+.day-header.open { background: color-mix(in srgb, var(–accent) 10%, transparent); }
+.day-date { font-weight: 800; font-size: 14px; }
+.day-sub { font-size: 11px; color: var(–sub); margin-top: 2px; }
+.day-body { padding: 4px 16px 16px; border-top: 1px solid var(–border); }
+.chevron { color: var(–sub); font-size: 12px; transition: transform .25s; }
+.chevron.open { transform: rotate(180deg); }
+
+/* ── Notes Block ── */
+.note-block {
+background: var(–inp);
+border-radius: 9px;
+padding: 10px 12px;
+margin-top: 10px;
+}
+.note-row {
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+padding: 5px 0;
+border-bottom: 1px solid color-mix(in srgb, var(–border) 60%, transparent);
+font-size: 12px;
+gap: 12px;
+}
+.note-row:last-child { border-bottom: none; }
+.note-row .lbl { color: var(–sub); flex-shrink: 0; }
+.note-row .val { font-weight: 600; text-align: left; }
+.note-general { padding: 7px 0; font-size: 12px; }
+.note-general .lbl { color: var(–sub); margin-bottom: 3px; }
+.note-general .val { font-weight: 600; line-height: 1.6; }
+.note-time { font-size: 10px; color: var(–sub); margin-top: 6px; text-align: left; }
+
+/* ── Badges ── */
+.today-tag {
+background: #f59e0b;
+color: #fff;
+border-radius: 6px;
+padding: 1px 7px;
+font-size: 10px;
+font-weight: 700;
+margin-left: 6px;
+}
+
+/* ── Toast ── */
+.toast {
+position: fixed;
+bottom: 28px;
+left: 50%;
+transform: translateX(-50%) translateY(20px);
+background: var(–accent);
+color: #fff;
+border-radius: 12px;
+padding: 11px 22px;
+font-weight: 700;
+font-size: 13px;
+box-shadow: 0 4px 24px #00000060;
+white-space: nowrap;
+opacity: 0;
+transition: opacity .35s, transform .35s;
+pointer-events: none;
+z-index: 9999;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── Sync dot ── */
+.sync-dot {
+position: fixed;
+top: 22px;
+left: 18px;
+width: 8px; height: 8px;
+border-radius: 50%;
+background: var(–green);
+box-shadow: 0 0 10px var(–green);
+opacity: 0;
+transition: opacity .3s;
+z-index: 200;
+}
+.sync-dot.show { opacity: 1; }
+
+/* ── Gist config panel ── */
+.config-panel {
+background: color-mix(in srgb, var(–accent) 8%, var(–card));
+border: 1px dashed var(–accent);
+border-radius: 12px;
+padding: 14px 16px;
+margin-bottom: 14px;
+font-size: 12px;
+}
+.config-panel summary { cursor: pointer; font-weight: 700; color: var(–accent); font-size: 13px; margin-bottom: 0; }
+.config-panel[open] summary { margin-bottom: 12px; }
+.config-panel input { margin-top: 4px; margin-bottom: 10px; }
+
+/* ── Empty state ── */
+.empty { text-align: center; padding: 50px 0; color: var(–sub); }
+.empty .icon { font-size: 44px; margin-bottom: 10px; }
+.empty .msg { font-size: 15px; font-weight: 700; }
+.empty .sub { font-size: 12px; margin-top: 5px; }
+
+/* ── Section title in history ── */
+.mini-sec { font-size: 12px; font-weight: 700; color: var(–accent); margin: 12px 0 8px; display: flex; align-items: center; gap: 6px; }
+
+/* scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(–border); border-radius: 3px; }
+</style>
+
+</head>
+<body>
+
+<!-- Sync indicator -->
+
+<div class="sync-dot" id="syncDot"></div>
+
+<!-- Header -->
+
+<div class="header">
+  <div>
+    <div class="header-title">💊 متابعة الأدوية اليومية</div>
+    <div class="header-sub" id="headerDate"></div>
+  </div>
+  <button class="dark-btn" id="darkBtn" onclick="toggleDark()">☀️</button>
+</div>
+
+<!-- Main -->
+
+<div class="container">
+
+  <!-- Sync bar -->
+
+  <div style="background:color-mix(in srgb,var(--green) 12%,var(--card));border:1px solid color-mix(in srgb,var(--green) 40%,transparent);border-radius:10px;padding:9px 14px;margin-bottom:14px;font-size:12px;color:var(--green);font-weight:700;display:flex;align-items:center;gap:8px;">
+    ☁️ المزامنة مع GitHub مفعّلة — كل الأجهزة تشوف نفس البيانات
+  </div>
+
+  <!-- GitHub Gist Config (hidden) -->
+
+  <details class="config-panel" id="configPanel" style="display:none">
+    <summary>⚙️ إعداد المزامنة عبر GitHub Gist (اختياري)</summary>
+    <label>Gist ID</label>
+    <input type="text" id="gistId" placeholder="abc123def456..." oninput="saveConfig()">
+    <label>GitHub Token</label>
+    <input type="password" id="gistToken" placeholder="ghp_xxxxxxxxxx..." oninput="saveConfig()">
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+      <input type="checkbox" id="gistEnabled" style="width:auto;margin:0;" onchange="saveConfig()">
+      <span>تفعيل المزامنة</span>
+    </label>
+    <div style="margin-top:10px;color:var(--sub);font-size:11px;line-height:1.7;">
+      ⚠️ بعد الإعداد: كل من يفتح الصفحة سيشوف نفس البيانات<br>
+      📖 <a href="https://gist.github.com" target="_blank" style="color:var(--accent);">أنشئ Gist هنا</a> ثم احصل على Token من GitHub Settings → Tokens
+    </div>
+  </details>
+
+  <!-- Tabs -->
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tabAdd" onclick="switchTab('add')">➕ تسجيل اليوم</button>
+    <button class="tab-btn" id="tabHistory" onclick="switchTab('history')">📅 السجل التاريخي</button>
+  </div>
+
+  <!-- ADD TAB -->
+
+  <div id="addTab">
+
+```
+<!-- Add Medication -->
+<div class="card">
+  <div class="sec-title">💊 إضافة دواء</div>
+  <div class="grid2">
+    <div>
+      <label>اسم الدواء *</label>
+      <input type="text" id="mName" placeholder="باراسيتامول..." onkeydown="if(event.key==='Enter')addMed()">
+    </div>
+    <div>
+      <label>الجرعة</label>
+      <input type="text" id="mDose" placeholder="500mg / قرص واحد">
+    </div>
+  </div>
+  <div class="grid2">
+    <div>
+      <label>⏰ وقت الأخذ</label>
+      <input type="time" id="mTime">
+    </div>
+    <div>
+      <label>ملاحظة الجرعة</label>
+      <input type="text" id="mNote" placeholder="بعد الأكل / قبل النوم">
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="addMed()">＋ إضافة الدواء</button>
+</div>
+
+<!-- Today's Meds List -->
+<div class="card" id="todayMedsCard" style="display:none">
+  <div class="sec-title" id="todayMedsTitle">✅ أدوية اليوم</div>
+  <div id="todayMedsList"></div>
+</div>
+
+<!-- Observations -->
+<div class="card">
+  <div class="sec-title">📊 المراقبة اليومية</div>
+  <div class="grid2">
+    <div>
+      <label>💧 كمية الماء</label>
+      <input type="text" id="oWater" placeholder="1.5 لتر / 6 أكواب">
+    </div>
+    <div>
+      <label>🏃 النشاط البدني</label>
+      <input type="text" id="oActivity" placeholder="مشي 20 دقيقة / راحة">
+    </div>
+  </div>
+  <div class="grid2">
+    <div>
+      <label>🚽 كمية ولون البول</label>
+      <input type="text" id="oUrine" placeholder="طبيعي / فاتح / داكن / قليل">
+    </div>
+    <div>
+      <label>🔢 مرات دخول الحمام</label>
+      <input type="number" id="oBathrooms" placeholder="5" min="0">
+    </div>
+  </div>
+  <div style="margin-bottom:14px">
+    <label>📝 ملاحظات عامة</label>
+    <textarea id="oGeneral" placeholder="حالة المريض العامة، آلام، مزاج، نوم، شهية، أي ملاحظة..."></textarea>
+  </div>
+  <button class="btn btn-success" onclick="saveObs()">✓ حفظ الملاحظات</button>
+</div>
+```
+
+  </div><!-- end addTab -->
+
+  <!-- HISTORY TAB -->
+
+  <div id="historyTab" style="display:none">
+    <div id="historyList"></div>
+  </div>
+
+</div><!-- end container -->
+
+<!-- Toast -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════
+let records = {};   // { "2025-01-15": { meds:[...], notes:{...} } }
+let isDark = true;
+let currentTab = 'add';
+
+// ══════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+
+function nowTime() {
+  return new Date().toLocaleTimeString('ar-EG', { hour:'2-digit', minute:'2-digit', hour12:false });
+}
+
+function fmtDate(d) {
+  return new Date(d + 'T12:00:00').toLocaleDateString('ar-SA', {
+    weekday:'long', year:'numeric', month:'long', day:'numeric'
+  });
+}
+
+function todayRec() { return records[todayStr()] || { meds:[], notes:null }; }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function syncDot(show) {
+  document.getElementById('syncDot').classList.toggle('show', show);
+}
+
+// ══════════════════════════════════════════
+//  GIST CONFIG
+// ══════════════════════════════════════════
+function getConfig() {
+  return {
+    id: 'faf1d02a6eb92072374a681056b9cfab',
+    token: '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',
+    enabled: true,
+  };
+}
+
+function saveConfig() {}
+function loadConfig() {}
+
+async function gistLoad() {
+  const c = getConfig();
+  if (!c.enabled || !c.id || !c.token) return null;
+  try {
+    const r = await fetch(`https://api.github.com/gists/${c.id}`, {
+      headers: { Authorization: `token ${c.token}` }
+    });
+    const d = await r.json();
+    const file = d.files && d.files['med-tracker.json'];
+    if (!file) return null;
+    return JSON.parse(file.content);
+  } catch(e) { console.warn('Gist load failed:', e); return null; }
+}
+
+async function gistSave(data) {
+  const c = getConfig();
+  if (!c.enabled || !c.id || !c.token) return;
+  try {
+    syncDot(true);
+    await fetch(`https://api.github.com/gists/${c.id}`, {
+      method: 'PATCH',
+      headers: { Authorization: `token ${c.token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ files: { 'med-tracker.json': { content: JSON.stringify(data, null, 2) } } })
+    });
+  } catch(e) { console.warn('Gist save failed:', e); }
+  finally { setTimeout(() => syncDot(false), 1000); }
+}
+
+// ══════════════════════════════════════════
+//  PERSISTENCE
+// ══════════════════════════════════════════
+async function persist(newRecords) {
+  records = newRecords;
+  localStorage.setItem('medtrack_v3', JSON.stringify(records));
+  await gistSave(records);
+  render();
+}
+
+// ══════════════════════════════════════════
+//  ACTIONS
+// ══════════════════════════════════════════
+function addMed() {
+  const name = document.getElementById('mName').value.trim();
+  if (!name) { showToast('⚠️ أدخل اسم الدواء'); return; }
+  const dose = document.getElementById('mDose').value.trim();
+  const time = document.getElementById('mTime').value || nowTime();
+  const note = document.getElementById('mNote').value.trim();
+
+  const today = todayStr();
+  const entry = { id: Date.now(), name, dose, time, note };
+  const cur = todayRec();
+  const updated = {
+    ...records,
+    [today]: { ...cur, meds: [...(cur.meds||[]), entry] }
+  };
+  persist(updated);
+
+  document.getElementById('mName').value = '';
+  document.getElementById('mDose').value = '';
+  document.getElementById('mNote').value = '';
+  document.getElementById('mTime').value = nowTime();
+  showToast('✅ تم تسجيل الدواء');
+}
+
+function deleteMed(day, id) {
+  if (!confirm('حذف هذا الدواء من السجل؟')) return;
+  const updated = {
+    ...records,
+    [day]: { ...records[day], meds: records[day].meds.filter(m => m.id !== id) }
+  };
+  persist(updated);
+}
+
+function saveObs() {
+  const today = todayStr();
+  const notes = {
+    water: document.getElementById('oWater').value.trim(),
+    activity: document.getElementById('oActivity').value.trim(),
+    urine: document.getElementById('oUrine').value.trim(),
+    bathrooms: document.getElementById('oBathrooms').value.trim(),
+    generalNote: document.getElementById('oGeneral').value.trim(),
+    savedAt: nowTime(),
+  };
+  const cur = todayRec();
+  const updated = { ...records, [today]: { ...cur, notes } };
+  persist(updated);
+  showToast('✅ تم حفظ الملاحظات');
+}
+
+// ══════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════
+function render() {
+  if (currentTab === 'add') renderAdd();
+  else renderHistory();
+}
+
+function renderAdd() {
+  const today = todayStr();
+  const rec = records[today] || { meds:[], notes:null };
+  const meds = rec.meds || [];
+
+  // Today's meds
+  const card = document.getElementById('todayMedsCard');
+  const list = document.getElementById('todayMedsList');
+  const title = document.getElementById('todayMedsTitle');
+
+  if (meds.length === 0) {
+    card.style.display = 'none';
+  } else {
+    card.style.display = 'block';
+    title.textContent = `✅ أدوية اليوم · ${meds.length} دواء`;
+    list.innerHTML = meds.map(m => `
+      <div class="med-pill">
+        <div>
+          <div class="med-name">💊 ${esc(m.name)}${m.dose ? ` <span>— ${esc(m.dose)}</span>` : ''}</div>
+          <div class="med-meta">⏰ ${esc(m.time)}${m.note ? ` · ${esc(m.note)}` : ''}</div>
+        </div>
+        <button class="del-btn" onclick="deleteMed('${today}',${m.id})">✕</button>
+      </div>
+    `).join('');
+  }
+
+  // Load observations into form
+  const n = rec.notes;
+  if (n) {
+    document.getElementById('oWater').value = n.water || '';
+    document.getElementById('oActivity').value = n.activity || '';
+    document.getElementById('oUrine').value = n.urine || '';
+    document.getElementById('oBathrooms').value = n.bathrooms || '';
+    document.getElementById('oGeneral').value = n.generalNote || '';
+  }
+}
+
+function renderHistory() {
+  const days = Object.keys(records).sort((a,b) => b.localeCompare(a));
+  const container = document.getElementById('historyList');
+  const today = todayStr();
+
+  if (days.length === 0) {
+    container.innerHTML = `
+      <div class="empty">
+        <div class="icon">📋</div>
+        <div class="msg">لا يوجد سجل بعد</div>
+        <div class="sub">ابدأ بتسجيل الأدوية من تبويب "تسجيل اليوم"</div>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML = days.map(day => {
+    const rec = records[day] || {};
+    const meds = rec.meds || [];
+    const notes = rec.notes;
+    const isToday = day === today;
+    const hasNotes = notes && Object.entries(notes).some(([k,v]) => k !== 'savedAt' && v);
+
+    return `
+    <div class="day-card" id="daycard_${day}">
+      <div class="day-header" id="dayhdr_${day}" onclick="toggleDay('${day}')">
+        <div>
+          <div class="day-date">
+            ${isToday ? '<span class="today-tag">اليوم</span>' : ''}
+            ${fmtDate(day)}
+          </div>
+          <div class="day-sub">
+            ${meds.length > 0 ? `💊 ${meds.length} دواء` : ''}
+            ${meds.length > 0 && hasNotes ? ' · ' : ''}
+            ${hasNotes ? '📊 ملاحظات مسجلة' : ''}
+            ${meds.length === 0 && !hasNotes ? 'لا يوجد سجل' : ''}
+          </div>
+        </div>
+        <span class="chevron" id="chev_${day}">▼</span>
+      </div>
+      <div class="day-body" id="daybody_${day}" style="display:none">
+        ${meds.length > 0 ? `
+          <div class="mini-sec">💊 الأدوية المُعطاة</div>
+          ${meds.map(m => `
+            <div class="med-pill">
+              <div>
+                <div class="med-name">💊 ${esc(m.name)}${m.dose ? ` <span>— ${esc(m.dose)}</span>` : ''}</div>
+                <div class="med-meta">⏰ ${esc(m.time)}${m.note ? ` · ${esc(m.note)}` : ''}</div>
+              </div>
+              ${isToday ? `<button class="del-btn" onclick="deleteMed('${day}',${m.id})">✕</button>` : ''}
+            </div>`).join('')}
+        ` : ''}
+        ${hasNotes ? `
+          <div class="mini-sec">📊 المراقبة اليومية</div>
+          <div class="note-block">
+            ${notes.water ? `<div class="note-row"><span class="lbl">💧 الماء</span><span class="val">${esc(notes.water)}</span></div>` : ''}
+            ${notes.activity ? `<div class="note-row"><span class="lbl">🏃 النشاط</span><span class="val">${esc(notes.activity)}</span></div>` : ''}
+            ${notes.urine ? `<div class="note-row"><span class="lbl">🚽 البول</span><span class="val">${esc(notes.urine)}</span></div>` : ''}
+            ${notes.bathrooms ? `<div class="note-row"><span class="lbl">🔢 مرات الحمام</span><span class="val">${esc(notes.bathrooms)} مرة</span></div>` : ''}
+            ${notes.generalNote ? `<div class="note-general"><div class="lbl">📝 ملاحظات عامة</div><div class="val">${esc(notes.generalNote)}</div></div>` : ''}
+            ${notes.savedAt ? `<div class="note-time">آخر تحديث: ${esc(notes.savedAt)}</div>` : ''}
+          </div>
+        ` : ''}
+        ${meds.length === 0 && !hasNotes ? `<div style="text-align:center;padding:16px 0;color:var(--sub);font-size:12px;">لا يوجد تسجيل لهذا اليوم</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  // Auto-expand today
+  if (records[today]) openDay(today, false);
+}
+
+function toggleDay(day) {
+  const body = document.getElementById('daybody_' + day);
+  const hdr = document.getElementById('dayhdr_' + day);
+  const chev = document.getElementById('chev_' + day);
+  const isOpen = body.style.display !== 'none';
+  body.style.display = isOpen ? 'none' : 'block';
+  hdr.classList.toggle('open', !isOpen);
+  chev.classList.toggle('open', !isOpen);
+}
+
+function openDay(day, toggle=true) {
+  const body = document.getElementById('daybody_' + day);
+  if (!body) return;
+  if (toggle && body.style.display !== 'none') return;
+  body.style.display = 'block';
+  document.getElementById('dayhdr_' + day)?.classList.add('open');
+  document.getElementById('chev_' + day)?.classList.add('open');
+}
+
+function esc(str) {
+  return String(str)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+// ══════════════════════════════════════════
+//  UI CONTROLS
+// ══════════════════════════════════════════
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('addTab').style.display = tab === 'add' ? 'block' : 'none';
+  document.getElementById('historyTab').style.display = tab === 'history' ? 'block' : 'none';
+  document.getElementById('tabAdd').classList.toggle('active', tab === 'add');
+  document.getElementById('tabHistory').classList.toggle('active', tab === 'history');
+  render();
+}
+
+function toggleDark() {
+  isDark = !isDark;
+  document.body.classList.toggle('light', !isDark);
+  document.getElementById('darkBtn').textContent = isDark ? '☀️' : '🌙';
+  localStorage.setItem('darkMode', isDark ? '1' : '0');
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+async function init() {
+  // Dark mode
+  const dm = localStorage.getItem('darkMode');
+  if (dm === '0') { isDark = false; document.body.classList.add('light'); document.getElementById('darkBtn').textContent = '🌙'; }
+
+  // Header date
+  document.getElementById('headerDate').textContent = fmtDate(todayStr());
+
+  // Set default time
+  document.getElementById('mTime').value = nowTime();
+
+  // Load config
+  loadConfig();
+
+  // Load data
+  const remote = await gistLoad();
+  if (remote) {
+    records = remote;
+    showToast('☁️ تم التزامن مع Gist');
+  } else {
+    const local = localStorage.getItem('medtrack_v3');
+    if (local) records = JSON.parse(local);
+  }
+
+  // Hide config panel if not configured
+  const c = getConfig();
+  if (c.id && c.token) {
+    // keep open for editing if needed
+  }
+
+  render();
+}
+
+init();
+</script>
+
+</body>
+</html>

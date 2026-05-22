@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>متابعة الأدوية اليومية</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #060d1a;
+  --surf: #0d1f3c;
+  --card: #0f2444;
+  --border: #1a3a6e;
+  --text: #e2eaf8;
+  --sub: #7a96c2;
+  --accent: #4db8ff;
+  --pill: #0a2040;
+  --pill-bdr: #1a5096;
+  --danger: #ff5e57;
+  --green: #22c55e;
+  --inp: #07172e;
+  --inp-bdr: #1e3f6f;
+  --grad: linear-gradient(135deg,#0a2a6e,#081a4a);
+  --shadow: 0 4px 24px #00000070;
+}
+body.light {
+  --bg: #f0f5fc;
+  --surf: #ffffff;
+  --card: #ffffff;
+  --border: #d0dff0;
+  --text: #1a2a42;
+  --sub: #5a728e;
+  --accent: #1565c0;
+  --pill: #e8f0fe;
+  --pill-bdr: #90b0ef;
+  --danger: #e53935;
+  --green: #16a34a;
+  --inp: #f5f8ff;
+  --inp-bdr: #c0d0e8;
+  --grad: linear-gradient(135deg,#1565c0,#1e88e5);
+  --shadow: 0 4px 20px #00000018;
+}
+
+body {
+  font-family: 'Tajawal', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  direction: rtl;
+  -webkit-text-size-adjust: 100%;
+  transition: background .3s, color .3s;
+}
+
+.hdr {
+  background: var(--grad);
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 20px #00000055;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.hdr-title { font-size: 18px; font-weight: 900; color: #fff; }
+.hdr-sub { font-size: 12px; color: #90caf9; margin-top: 2px; }
+
+.mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255,255,255,0.18);
+  border: 1.5px solid rgba(255,255,255,0.3);
+  border-radius: 20px;
+  padding: 7px 14px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition: background .2s;
+}
+.mode-btn:active { background: rgba(255,255,255,0.28); }
+.mode-emoji { font-size: 15px; line-height: 1; }
+.mode-txt { font-size: 12px; font-weight: 700; color: #fff; font-family: 'Tajawal', sans-serif; }
+
+.wrap { max-width: 640px; margin: 0 auto; padding: 16px 14px 100px; }
+
+.sync-bar {
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.35);
+  border-radius: 10px;
+  padding: 9px 14px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: var(--green);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  padding: 5px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.tab-btn {
+  padding: 10px 6px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: 'Tajawal', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  background: transparent;
+  color: var(--sub);
+  transition: all .25s;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+  text-align: center;
+  -webkit-appearance: none;
+}
+.tab-btn.active { background: var(--accent); color: #fff; }
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+.sec-title { font-size: 14px; font-weight: 800; color: var(--accent); margin-bottom: 14px; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+@media(max-width:480px){ .grid2 { grid-template-columns: 1fr; } }
+
+label { font-size: 12px; font-weight: 600; color: var(--sub); display: block; margin-bottom: 5px; }
+
+input[type=text], input[type=number], input[type=time], textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1.5px solid var(--inp-bdr);
+  background: var(--inp);
+  color: var(--text);
+  font-family: 'Tajawal', sans-serif;
+  font-size: 14px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color .2s;
+}
+input[type=text], input[type=number] { direction: rtl; }
+input[type=time] { direction: ltr; text-align: center; }
+input:focus, textarea:focus { border-color: var(--accent); }
+textarea { resize: vertical; min-height: 72px; line-height: 1.6; direction: rtl; }
+
+.btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 11px;
+  cursor: pointer;
+  font-family: 'Tajawal', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  margin-top: 4px;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: opacity .2s;
+}
+.btn:active { opacity: .8; }
+.btn-p { background: var(--accent); color: #fff; }
+.btn-g { background: var(--green); color: #fff; }
+
+.med-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--pill);
+  border: 1px solid var(--pill-bdr);
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  gap: 10px;
+}
+.med-info { flex: 1; min-width: 0; }
+.med-name { font-weight: 700; font-size: 13px; }
+.med-dose { color: var(--sub); font-weight: 400; }
+.med-meta { font-size: 11px; color: var(--sub); margin-top: 2px; }
+.del-btn {
+  background: rgba(255,94,87,0.12);
+  border: 1px solid rgba(255,94,87,0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--danger);
+  font-size: 14px;
+  padding: 6px 10px;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
+}
+
+.day-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  margin-bottom: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.day-hdr {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 13px 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition: background .2s;
+}
+.day-hdr.open { background: rgba(77,184,255,0.08); }
+.day-date { font-weight: 800; font-size: 14px; }
+.day-sub { font-size: 11px; color: var(--sub); margin-top: 2px; }
+.day-body { padding: 8px 16px 16px; border-top: 1px solid var(--border); }
+.chev { color: var(--sub); font-size: 11px; transition: transform .25s; flex-shrink: 0; }
+.chev.open { transform: rotate(180deg); }
+
+.note-block { background: var(--inp); border-radius: 9px; padding: 10px 12px; margin-top: 10px; }
+.note-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(128,128,128,0.15); font-size: 12px; gap: 10px; }
+.note-row:last-child { border-bottom: none; }
+.note-lbl { color: var(--sub); flex-shrink: 0; }
+.note-val { font-weight: 700; }
+.note-at { font-size: 10px; color: var(--sub); margin-top: 6px; }
+.mini-sec { font-size: 12px; font-weight: 700; color: var(--accent); margin: 10px 0 8px; }
+
+.today-tag { background: #f59e0b; color: #fff; border-radius: 6px; padding: 1px 7px; font-size: 10px; font-weight: 700; margin-left: 6px; }
+
+.toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: #0d2a50;
+  border: 1px solid var(--accent);
+  color: #fff;
+  border-radius: 12px;
+  padding: 11px 22px;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 4px 24px #00000060;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity .3s, transform .3s;
+  pointer-events: none;
+  z-index: 999;
+  font-family: 'Tajawal', sans-serif;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.sync-dot {
+  position: fixed; top: 18px; left: 16px;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+  opacity: 0; transition: opacity .3s; z-index: 200;
+}
+.sync-dot.show { opacity: 1; }
+
+.empty { text-align: center; padding: 50px 0; color: var(--sub); }
+.empty .eicon { font-size: 44px; margin-bottom: 10px; }
+.empty .emsg { font-size: 15px; font-weight: 700; }
+.empty .esub { font-size: 12px; margin-top: 5px; }
+</style>
+</head>
+<body>
+
+<div class="sync-dot" id="syncDot"></div>
+
+<div class="hdr">
+  <div>
+    <div class="hdr-title">💊 متابعة الأدوية</div>
+    <div class="hdr-sub" id="hdrDate"></div>
+  </div>
+  <div class="mode-btn" onclick="toggleDark()" id="modeBtn">
+    <span class="mode-emoji" id="modeEmoji">🌙</span>
+    <span class="mode-txt" id="modeTxt">ليلي</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="sync-bar">☁️ المزامنة مع GitHub مفعّلة — كل الأجهزة تشوف نفس البيانات</div>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tabAdd" onclick="switchTab('add')">➕ تسجيل اليوم</button>
+    <button class="tab-btn" id="tabHist" onclick="switchTab('history')">📅 السجل</button>
+  </div>
+
+  <div id="addTab">
+
+    <div class="card">
+      <div class="sec-title">💊 إضافة دواء</div>
+      <div class="grid2">
+        <div><label>اسم الدواء *</label><input type="text" id="mName" placeholder="باراسيتامول..."></div>
+        <div><label>الجرعة</label><input type="text" id="mDose" placeholder="500mg / قرص"></div>
+      </div>
+      <div class="grid2">
+        <div><label>⏰ وقت الأخذ</label><input type="time" id="mTime"></div>
+        <div><label>ملاحظة الجرعة</label><input type="text" id="mNote" placeholder="بعد الأكل..."></div>
+      </div>
+      <button class="btn btn-p" onclick="addMed()">＋ إضافة الدواء</button>
+    </div>
+
+    <div class="card" id="todayCard" style="display:none">
+      <div class="sec-title" id="todayTitle">✅ أدوية اليوم</div>
+      <div id="todayList"></div>
+    </div>
+
+    <div class="card">
+      <div class="sec-title">📊 المراقبة اليومية</div>
+      <div class="grid2">
+        <div><label>💧 كمية الماء</label><input type="text" id="oWater" placeholder="1.5 لتر / 6 أكواب"></div>
+        <div><label>🏃 النشاط البدني</label><input type="text" id="oActivity" placeholder="مشي 20 دقيقة"></div>
+      </div>
+      <div class="grid2">
+        <div><label>🚽 البول (كمية ولون)</label><input type="text" id="oUrine" placeholder="طبيعي / فاتح / داكن"></div>
+        <div><label>🔢 مرات الحمام</label><input type="number" id="oBath" placeholder="5" min="0"></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <label>📝 ملاحظات عامة</label>
+        <textarea id="oGen" placeholder="حالة المريض، آلام، مزاج، نوم، شهية..."></textarea>
+      </div>
+      <button class="btn btn-g" onclick="saveObs()">✓ حفظ الملاحظات</button>
+    </div>
+
+  </div>
+
+  <div id="histTab" style="display:none">
+    <div id="histList"></div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const GIST_ID    = 'faf1d02a6eb92072374a681056b9cfab';
+const GIST_TOKEN = atob('Z2hwX3FkaVNpVlBDV0V5NDhTSFpuOHNXS1FqQUZSOFBqUjE2QWNJTg==');
+const GIST_FILE  = 'med-tracker.json';
+
+let records = {};
+let isDark = true;
+let curTab = 'add';
+
+function todayStr() { return new Date().toISOString().split('T')[0]; }
+function nowTime() {
+  const d = new Date();
+  return String(d.getHours()).padStart(2,'0') + ':' + String(d.getMinutes()).padStart(2,'0');
+}
+function fmtDate(s) {
+  return new Date(s+'T12:00:00').toLocaleDateString('ar-SA',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+}
+function todayRec() { return records[todayStr()] || {meds:[],notes:null}; }
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function showToast(msg, err) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.style.background = err ? '#7f1d1d' : '#0d2a50';
+  el.style.borderColor = err ? '#ef4444' : 'var(--accent)';
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'), 2600);
+}
+function syncDot(v) { document.getElementById('syncDot').classList.toggle('show',v); }
+
+async function gistLoad() {
+  try {
+    const r = await fetch('https://api.github.com/gists/'+GIST_ID, {
+      headers:{'Authorization':'token '+GIST_TOKEN,'Accept':'application/vnd.github.v3+json'}
+    });
+    if (!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    const f = d.files && d.files[GIST_FILE];
+    if (!f || !f.content || f.content.trim()==='{}' || f.content.trim()==='') return null;
+    return JSON.parse(f.content);
+  } catch(e) { console.warn('Gist load:',e); return null; }
+}
+
+async function gistSave(data) {
+  try {
+    syncDot(true);
+    await fetch('https://api.github.com/gists/'+GIST_ID, {
+      method:'PATCH',
+      headers:{'Authorization':'token '+GIST_TOKEN,'Content-Type':'application/json','Accept':'application/vnd.github.v3+json'},
+      body: JSON.stringify({files:{[GIST_FILE]:{content:JSON.stringify(data,null,2)}}})
+    });
+  } catch(e) { console.warn('Gist save:',e); }
+  finally { setTimeout(()=>syncDot(false),1200); }
+}
+
+async function persist(next) {
+  records = next;
+  localStorage.setItem('medtrack_v4', JSON.stringify(records));
+  await gistSave(records);
+  render();
+}
+
+function addMed() {
+  const name = document.getElementById('mName').value.trim();
+  if (!name) { showToast('⚠️ أدخل اسم الدواء', true); return; }
+  const dose = document.getElementById('mDose').value.trim();
+  const time = document.getElementById('mTime').value || nowTime();
+  const note = document.getElementById('mNote').value.trim();
+  const today = todayStr();
+  const cur = todayRec();
+  persist({...records, [today]:{...cur, meds:[...(cur.meds||[]),{id:Date.now(),name,dose,time,note}]}});
+  document.getElementById('mName').value='';
+  document.getElementById('mDose').value='';
+  document.getElementById('mNote').value='';
+  document.getElementById('mTime').value=nowTime();
+  showToast('✅ تم تسجيل الدواء');
+}
+
+function delMed(day, id) {
+  if (!confirm('حذف هذا الدواء؟')) return;
+  const next = {...records, [day]:{...records[day], meds:records[day].meds.filter(m=>m.id!==id)}};
+  persist(next);
+}
+
+function saveObs() {
+  const today = todayStr();
+  const notes = {
+    water:    document.getElementById('oWater').value.trim(),
+    activity: document.getElementById('oActivity').value.trim(),
+    urine:    document.getElementById('oUrine').value.trim(),
+    bath:     document.getElementById('oBath').value.trim(),
+    gen:      document.getElementById('oGen').value.trim(),
+    at:       nowTime(),
+  };
+  persist({...records, [today]:{...todayRec(), notes}});
+  showToast('✅ تم حفظ الملاحظات');
+}
+
+function render() {
+  if (curTab==='add') renderAdd(); else renderHist();
+}
+
+function renderAdd() {
+  const rec = records[todayStr()] || {meds:[],notes:null};
+  const meds = rec.meds||[];
+  const card = document.getElementById('todayCard');
+  if (meds.length===0) {
+    card.style.display='none';
+  } else {
+    card.style.display='block';
+    document.getElementById('todayTitle').textContent = '✅ أدوية اليوم · '+meds.length;
+    document.getElementById('todayList').innerHTML = meds.map(m=>`
+      <div class="med-pill">
+        <div class="med-info">
+          <div class="med-name">💊 ${esc(m.name)}${m.dose?` <span class="med-dose">— ${esc(m.dose)}</span>`:''}</div>
+          <div class="med-meta">⏰ ${esc(m.time)}${m.note?` · ${esc(m.note)}`:''}</div>
+        </div>
+        <button class="del-btn" onclick="delMed('${todayStr()}',${m.id})">✕</button>
+      </div>`).join('');
+  }
+  const n = rec.notes;
+  if (n) {
+    document.getElementById('oWater').value    = n.water||'';
+    document.getElementById('oActivity').value = n.activity||'';
+    document.getElementById('oUrine').value    = n.urine||'';
+    document.getElementById('oBath').value     = n.bath||'';
+    document.getElementById('oGen').value      = n.gen||'';
+  }
+}
+
+function renderHist() {
+  const days = Object.keys(records).sort((a,b)=>b.localeCompare(a));
+  const today = todayStr();
+  const el = document.getElementById('histList');
+  if (days.length===0) {
+    el.innerHTML='<div class="empty"><div class="eicon">📋</div><div class="emsg">لا يوجد سجل بعد</div><div class="esub">ابدأ بتسجيل الأدوية من تبويب "تسجيل اليوم"</div></div>';
+    return;
+  }
+  el.innerHTML = days.map(day=>{
+    const rec=records[day]||{};
+    const meds=rec.meds||[];
+    const notes=rec.notes;
+    const isT=day===today;
+    const hasN=notes&&Object.entries(notes).some(([k,v])=>k!=='at'&&v);
+    return `
+    <div class="day-card">
+      <div class="day-hdr" id="dh_${day}" onclick="toggleDay('${day}')">
+        <div>
+          <div class="day-date">${isT?'<span class="today-tag">اليوم</span>':''}${fmtDate(day)}</div>
+          <div class="day-sub">
+            ${meds.length?'💊 '+meds.length+' دواء':''}
+            ${meds.length&&hasN?' · ':''}
+            ${hasN?'📊 ملاحظات':''}
+            ${!meds.length&&!hasN?'لا يوجد سجل':''}
+          </div>
+        </div>
+        <span class="chev" id="ch_${day}">▼</span>
+      </div>
+      <div class="day-body" id="db_${day}" style="display:none">
+        ${meds.length?`<div class="mini-sec">💊 الأدوية المُعطاة</div>${meds.map(m=>`
+          <div class="med-pill">
+            <div class="med-info">
+              <div class="med-name">💊 ${esc(m.name)}${m.dose?` <span class="med-dose">— ${esc(m.dose)}</span>`:''}</div>
+              <div class="med-meta">⏰ ${esc(m.time)}${m.note?` · ${esc(m.note)}`:''}</div>
+            </div>
+            ${isT?`<button class="del-btn" onclick="delMed('${day}',${m.id})">✕</button>`:''}
+          </div>`).join('')}`:''}
+        ${hasN?`<div class="mini-sec">📊 المراقبة اليومية</div>
+          <div class="note-block">
+            ${notes.water?`<div class="note-row"><span class="note-lbl">💧 الماء</span><span class="note-val">${esc(notes.water)}</span></div>`:''}
+            ${notes.activity?`<div class="note-row"><span class="note-lbl">🏃 النشاط</span><span class="note-val">${esc(notes.activity)}</span></div>`:''}
+            ${notes.urine?`<div class="note-row"><span class="note-lbl">🚽 البول</span><span class="note-val">${esc(notes.urine)}</span></div>`:''}
+            ${notes.bath?`<div class="note-row"><span class="note-lbl">🔢 الحمام</span><span class="note-val">${esc(notes.bath)} مرة</span></div>`:''}
+            ${notes.gen?`<div style="padding:6px 0;font-size:12px"><div class="note-lbl">📝 ملاحظات عامة</div><div style="font-weight:700;margin-top:3px;line-height:1.6">${esc(notes.gen)}</div></div>`:''}
+            ${notes.at?`<div class="note-at">آخر تحديث: ${esc(notes.at)}</div>`:''}
+          </div>`:''}
+        ${!meds.length&&!hasN?'<div style="text-align:center;padding:14px 0;color:var(--sub);font-size:12px">لا يوجد تسجيل</div>':''}
+      </div>
+    </div>`;
+  }).join('');
+  if (records[today]) openDay(today);
+}
+
+function toggleDay(day) {
+  const body=document.getElementById('db_'+day);
+  const hdr=document.getElementById('dh_'+day);
+  const chev=document.getElementById('ch_'+day);
+  const open=body.style.display!=='none';
+  body.style.display=open?'none':'block';
+  hdr.classList.toggle('open',!open);
+  chev.classList.toggle('open',!open);
+}
+function openDay(day) {
+  const body=document.getElementById('db_'+day);
+  if(!body)return;
+  body.style.display='block';
+  document.getElementById('dh_'+day)?.classList.add('open');
+  document.getElementById('ch_'+day)?.classList.add('open');
+}
+
+function switchTab(tab) {
+  curTab=tab;
+  document.getElementById('addTab').style.display  = tab==='add'?'block':'none';
+  document.getElementById('histTab').style.display = tab==='history'?'block':'none';
+  document.getElementById('tabAdd').classList.toggle('active',  tab==='add');
+  document.getElementById('tabHist').classList.toggle('active', tab==='history');
+  render();
+}
+
+function toggleDark() {
+  isDark=!isDark;
+  document.body.classList.toggle('light',!isDark);
+  document.getElementById('modeEmoji').textContent = isDark?'🌙':'☀️';
+  document.getElementById('modeTxt').textContent   = isDark?'ليلي':'نهاري';
+  localStorage.setItem('dm', isDark?'1':'0');
+}
+
+async function init() {
+  const dm=localStorage.getItem('dm');
+  if(dm==='0'){
+    isDark=false;
+    document.body.classList.add('light');
+    document.getElementById('modeEmoji').textContent='☀️';
+    document.getElementById('modeTxt').textContent='نهاري';
+  }
+  document.getElementById('hdrDate').textContent=fmtDate(todayStr());
+  document.getElementById('mTime').value=nowTime();
+
+  const local=localStorage.getItem('medtrack_v4');
+  if(local){ records=JSON.parse(local); render(); }
+
+  const remote=await gistLoad();
+  if(remote){
+    records=remote;
+    localStorage.setItem('medtrack_v4',JSON.stringify(records));
+    render();
+    showToast('☁️ تم التزامن مع GitHub');
+  }
+}
+
+init();
+</script>
+</body>
+</html>

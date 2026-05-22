@@ -355,8 +355,10 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.6; direction: rtl;
 
 <script>
 const GIST_ID    = 'faf1d02a6eb92072374a681056b9cfab';
-const GIST_TOKEN = atob('Z2hwX3FkaVNpVlBDV0V5NDhTSFpuOHNXS1FqQUZSOFBqUjE2QWNJTg==');
 const GIST_FILE  = 'med-tracker.json';
+
+// استدعاء التوكن من ذاكرة المتصفح
+let GIST_TOKEN = localStorage.getItem('medtrack_gist_token');
 
 let records = {};
 let isDark = true;
@@ -384,6 +386,7 @@ function showToast(msg, err) {
 function syncDot(v) { document.getElementById('syncDot').classList.toggle('show',v); }
 
 async function gistLoad() {
+  if (!GIST_TOKEN) return null;
   try {
     const r = await fetch('https://api.github.com/gists/'+GIST_ID, {
       headers:{'Authorization':'token '+GIST_TOKEN,'Accept':'application/vnd.github.v3+json'}
@@ -397,6 +400,7 @@ async function gistLoad() {
 }
 
 async function gistSave(data) {
+  if (!GIST_TOKEN) return;
   try {
     syncDot(true);
     await fetch('https://api.github.com/gists/'+GIST_ID, {
@@ -411,7 +415,9 @@ async function gistSave(data) {
 async function persist(next) {
   records = next;
   localStorage.setItem('medtrack_v4', JSON.stringify(records));
-  await gistSave(records);
+  if (GIST_TOKEN) {
+    await gistSave(records);
+  }
   render();
 }
 
@@ -581,15 +587,36 @@ async function init() {
   document.getElementById('hdrDate').textContent=fmtDate(todayStr());
   document.getElementById('mTime').value=nowTime();
 
+  // --- التحقق من التوكن وطلبه للمرة الأولى ---
+  if (!GIST_TOKEN) {
+    const userInput = prompt("لربط بيانات الأدوية وتفعيل المزامنة، الرجاء إدخال GitHub Token الخاص بك:");
+    
+    if (userInput && userInput.trim() !== "") {
+      GIST_TOKEN = userInput.trim();
+      localStorage.setItem('medtrack_gist_token', GIST_TOKEN);
+    } else {
+      showToast('⚠️ المزامنة معطلة (لم يتم إدخال التوكن)', true);
+      const syncBar = document.querySelector('.sync-bar');
+      if (syncBar) {
+          syncBar.innerHTML = '⚠️ المزامنة معطلة — يرجى تحديث الصفحة وإدخال التوكن';
+          syncBar.style.background = 'rgba(255,94,87,0.12)';
+          syncBar.style.borderColor = 'rgba(255,94,87,0.35)';
+          syncBar.style.color = 'var(--danger)';
+      }
+    }
+  }
+
   const local=localStorage.getItem('medtrack_v4');
   if(local){ records=JSON.parse(local); render(); }
 
-  const remote=await gistLoad();
-  if(remote){
-    records=remote;
-    localStorage.setItem('medtrack_v4',JSON.stringify(records));
-    render();
-    showToast('☁️ تم التزامن مع GitHub');
+  if (GIST_TOKEN) {
+    const remote=await gistLoad();
+    if(remote){
+      records=remote;
+      localStorage.setItem('medtrack_v4',JSON.stringify(records));
+      render();
+      showToast('☁️ تم التزامن مع GitHub');
+    }
   }
 }
 
